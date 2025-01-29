@@ -303,10 +303,14 @@ METHOD Export2CSV( cFileName, lHeaderRow ) CLASS GridPlus
    local fHandle := nil
    local i := 0
    local j := 0
+   local k := 0
    local nRowCount := hmg_len( ::aData )
    local cLine := ''
    local cLineBreak := chr( 13 )
    local lStarted := .f.
+   local cbuffer := ''
+   local nBuffer := 0
+   local nRecBuffer := 10000
    default lHeaderRow := .t.
    if nRowCount == 0 // no data
       return nil
@@ -346,20 +350,32 @@ METHOD Export2CSV( cFileName, lHeaderRow ) CLASS GridPlus
    endif   
    // add data
    for i := 1 to nRowCount
-      cLine := ''   
-      lStarted := .f.
-      for j := 1 to ::nColumnCount
-         if ::aColumnWidths[ j ] > 0
-            if lstarted
-               cLine := cLine + ','
-            else
-               lStarted := .t.
-            endif
-            cLine := cLine + '"' + ::ParseQuote( ::aData[ i, j ] ) + '"'
-         endif   
-      next j
-      cLine := cLine + cLineBreak
-      fwrite( fHandle, cLine )
+      if nRowCount - i > nRecBuffer
+         nBuffer := i + nRecBuffer - 1
+      else
+         nBuffer := nRowCount
+      endif
+      cBuffer := ''
+      for k := i to nBuffer
+         cLine := ''   
+         lStarted := .f.
+         for j := 1 to ::nColumnCount
+            if ::aColumnWidths[ j ] > 0
+               if lstarted
+                  cLine := cLine + ','
+               else
+                  lStarted := .t.
+               endif
+               cLine := cLine + '"' + ::ParseQuote( memotran( ::aData[ i, j ], " ", " ")  ) + '"'
+            endif   
+         next j
+         cLine := cLine + cLineBreak
+         cBuffer := cBuffer + cLine
+         if i < nBuffer
+            i := i + 1
+         endif
+      next k   
+      fwrite( fHandle, cBuffer )
    next i   
    if fclose( fHandle )
       ::cLastExportFileName = cFileName
@@ -399,6 +415,9 @@ METHOD Export2HTML( cFileName ) CLASS GridPlus
    local a3rdGroupTotal := {}
    local nValue := 0
    local nPos := 0
+   local nRecBuffer := 300
+   local nBuffer := 0
+   
 
    if nRowCount == 0 // no data
       return nil
@@ -567,16 +586,60 @@ METHOD Export2HTML( cFileName ) CLASS GridPlus
          cHTML := cHTML + cGroupTD + replicate( '&nbsp;', ::nGroupIndent + ::nGroupIndent ) + '<b>' + alltrim( ::aColumnHeaders[ n3rdGroup ] ) + ' : ' + alltrim( cCur3rdGroup ) + '</b></TD>' + CRLF
          cHTML := cHTML + '</TR>' + CRLF
       endif
-   endif   
+   endif
+   fWrite( fHandle, cHTML )   
+   cHTML := ''
    for i := 1 to nRowCount
-      aLineData := ::aData[ i ]
-      // do we need a group/subgroup header change?
-      if lGrouping
-         if .not. aLineData[ n1stGroup ] == cCur1stGroup
-            if lColSum
-               // print all levels of total
-               // print 3rd group total if available
-               if n3rdGroup > 0
+      if nRowCount - i > nRecBuffer
+         nBuffer := i + nRecBuffer - 1
+      else
+         nBuffer := nRowCount
+      endif
+      cHTML := ''
+      for k := i to nBuffer
+         aLineData := ::aData[ i ]
+         // do we need a group/subgroup header change?
+         if lGrouping
+            if .not. aLineData[ n1stGroup ] == cCur1stGroup
+               if lColSum
+                  // print all levels of total
+                  // print 3rd group total if available
+                  if n3rdGroup > 0
+                     cHTML := cHTML + '<TR>' + CRLF
+                     for j := 1 to ::nColumnCount
+                        if aHTMLColumnWidths[ j ] > 0
+                           nPos := ascan( ::aColumnSum, j )
+                           if nPos == 0 // this column is not summed up. empty cell
+                              cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
+                           else // print corresponding total
+                              if hmg_len( ::aColumnPicture ) == 0 // no picture mentioned
+                                 cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a3rdGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
+                              else                              
+                                 cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a3rdGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
+                              endif   
+                           endif                     
+                        endif
+                     next i
+                     cHTML := cHTML + '</TR>' + CRLF
+                  endif
+                  if n2ndGroup > 0
+                     cHTML := cHTML + '<TR>' + CRLF
+                     for j := 1 to ::nColumnCount
+                        if aHTMLColumnWidths[ j ] > 0
+                           nPos := ascan( ::aColumnSum, j )
+                           if nPos == 0 // this column is not summed up. empty cell
+                              cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
+                           else // print corresponding total
+                              if hmg_len( ::aColumnPicture ) == 0 
+                                 cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a2ndGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
+                              else
+                                 cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a2ndGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
+                              endif   
+                           endif                     
+                        endif
+                     next i
+                     cHTML := cHTML + '</TR>' + CRLF
+                  endif
                   cHTML := cHTML + '<TR>' + CRLF
                   for j := 1 to ::nColumnCount
                      if aHTMLColumnWidths[ j ] > 0
@@ -584,134 +647,43 @@ METHOD Export2HTML( cFileName ) CLASS GridPlus
                         if nPos == 0 // this column is not summed up. empty cell
                            cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
                         else // print corresponding total
-                           if hmg_len( ::aColumnPicture ) == 0 // no picture mentioned
-                              cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a3rdGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
-                           else                              
-                              cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a3rdGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
+                           if hmg_len( ::aColumnPicture ) == 0
+                              cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a1stGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
+                           else   
+                              cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a1stGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
                            endif   
                         endif                     
                      endif
                   next i
                   cHTML := cHTML + '</TR>' + CRLF
-               endif
+               endif               
+               // group head change
+               afill( a1stGroupTotal, 0 )
+               afill( a2ndGroupTotal, 0 )
+               afill( a3rdGroupTotal, 0 )
+               cCur1stGroup := aLineData[ n1stGroup ]
+               cHTML := cHTML + '<TR>' + CRLF
+               cHTML := cHTML + cGroupTD + '<b>' + alltrim( ::aColumnHeaders[ n1stGroup ] ) + ' : ' + alltrim( cCur1stGroup ) + '</b></TD>' + CRLF
+               cHTML := cHTML + '</TR>' + CRLF
+               // since 1st group is changed, we have to change subgroup headings also!
                if n2ndGroup > 0
-                  cHTML := cHTML + '<TR>' + CRLF
-                  for j := 1 to ::nColumnCount
-                     if aHTMLColumnWidths[ j ] > 0
-                        nPos := ascan( ::aColumnSum, j )
-                        if nPos == 0 // this column is not summed up. empty cell
-                           cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
-                        else // print corresponding total
-                           if hmg_len( ::aColumnPicture ) == 0 
-                              cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a2ndGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
-                           else
-                              cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a2ndGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
-                           endif   
-                        endif                     
-                     endif
-                  next i
-                  cHTML := cHTML + '</TR>' + CRLF
-               endif
-               cHTML := cHTML + '<TR>' + CRLF
-               for j := 1 to ::nColumnCount
-                  if aHTMLColumnWidths[ j ] > 0
-                     nPos := ascan( ::aColumnSum, j )
-                     if nPos == 0 // this column is not summed up. empty cell
-                        cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
-                     else // print corresponding total
-                        if hmg_len( ::aColumnPicture ) == 0
-                           cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a1stGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
-                        else   
-                           cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a1stGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
-                        endif   
-                     endif                     
-                  endif
-               next i
-               cHTML := cHTML + '</TR>' + CRLF
-            endif               
-            // group head change
-            afill( a1stGroupTotal, 0 )
-            afill( a2ndGroupTotal, 0 )
-            afill( a3rdGroupTotal, 0 )
-            cCur1stGroup := aLineData[ n1stGroup ]
-            cHTML := cHTML + '<TR>' + CRLF
-            cHTML := cHTML + cGroupTD + '<b>' + alltrim( ::aColumnHeaders[ n1stGroup ] ) + ' : ' + alltrim( cCur1stGroup ) + '</b></TD>' + CRLF
-            cHTML := cHTML + '</TR>' + CRLF
-            // since 1st group is changed, we have to change subgroup headings also!
-            if n2ndGroup > 0
-               cCur2ndGroup := aLineData[ n2ndGroup ]
-               cHTML := cHTML + '<TR>' + CRLF
-               cHTML := cHTML + cGroupTD + replicate( '&nbsp;', ::nGroupIndent ) + '<b>' + alltrim( ::aColumnHeaders[ n2ndGroup ] ) + ' : ' + alltrim( cCur2ndGroup ) + '</b></TD>' + CRLF
-               cHTML := cHTML + '</TR>' + CRLF
-            endif
-            if n3rdGroup > 0
-               cCur3rdGroup := aLineData[ n3rdGroup ]
-               cHTML := cHTML + '<TR>' + CRLF
-               cHTML := cHTML + cGroupTD + replicate( '&nbsp;', ::nGroupIndent + ::nGroupIndent ) + '<b>' + alltrim( ::aColumnHeaders[ n3rdGroup ] ) + ' : ' + alltrim( cCur3rdGroup ) + '</b></TD>' + CRLF
-               cHTML := cHTML + '</TR>' + CRLF
-            endif
-         else   
-            if n2ndGroup > 0
-               if .not. aLineData[ n2ndGroup ] == cCur2ndGroup
-                  if lColSum
-                     // summation entries for 3rd group and 2nd group
-                     if n3rdGroup > 0
-                        cHTML := cHTML + '<TR>' + CRLF
-                        for j := 1 to ::nColumnCount
-                           if aHTMLColumnWidths[ j ] > 0
-                              nPos := ascan( ::aColumnSum, j )
-                              if nPos == 0 // this column is not summed up. empty cell
-                                 cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
-                              else // print corresponding total
-                                 if hmg_len( ::aColumnPicture ) == 0
-                                    cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a3rdGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
-                                 else   
-                                    cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a3rdGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
-                                 endif   
-                              endif                     
-                           endif
-                        next i
-                        cHTML := cHTML + '</TR>' + CRLF
-                     endif
-                     if n2ndGroup > 0
-                        cHTML := cHTML + '<TR>' + CRLF
-                        for j := 1 to ::nColumnCount
-                           if aHTMLColumnWidths[ j ] > 0
-                              nPos := ascan( ::aColumnSum, j )
-                              if nPos == 0 // this column is not summed up. empty cell
-                                 cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
-                              else // print corresponding total
-                                 if hmg_len( ::aColumnPicture ) == 0
-                                    cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a2ndGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
-                                 else
-                                    cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a2ndGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
-                                 endif                                 
-                              endif                     
-                           endif
-                        next i
-                        cHTML := cHTML + '</TR>' + CRLF
-                     endif
-                  endif
-                  // second level group changed
-                  afill( a2ndGroupTotal, 0 )
-                  afill( a3rdGroupTotal, 0 )
                   cCur2ndGroup := aLineData[ n2ndGroup ]
                   cHTML := cHTML + '<TR>' + CRLF
                   cHTML := cHTML + cGroupTD + replicate( '&nbsp;', ::nGroupIndent ) + '<b>' + alltrim( ::aColumnHeaders[ n2ndGroup ] ) + ' : ' + alltrim( cCur2ndGroup ) + '</b></TD>' + CRLF
                   cHTML := cHTML + '</TR>' + CRLF
-                  // change for 3rd level grouping if available
-                  if n3rdGroup > 0
-                     cCur3rdGroup := aLineData[ n3rdGroup ]
-                     cHTML := cHTML + '<TR>' + CRLF
-                     cHTML := cHTML + cGroupTD + replicate( '&nbsp;', ::nGroupIndent + ::nGroupIndent ) + '<b>' + alltrim( ::aColumnHeaders[ n3rdGroup ] ) + ' : ' + alltrim( cCur3rdGroup ) + '</b></TD>' + CRLF
-                     cHTML := cHTML + '</TR>' + CRLF
-                  endif
-               else
-               // check for 3rd level grouping
-                  if n3rdGroup > 0
-                     if .not. aLineData[ n3rdGroup ] == cCur3rdGroup
-                        if lColSum 
-                        // summation for 3rd grouping
+               endif
+               if n3rdGroup > 0
+                  cCur3rdGroup := aLineData[ n3rdGroup ]
+                  cHTML := cHTML + '<TR>' + CRLF
+                  cHTML := cHTML + cGroupTD + replicate( '&nbsp;', ::nGroupIndent + ::nGroupIndent ) + '<b>' + alltrim( ::aColumnHeaders[ n3rdGroup ] ) + ' : ' + alltrim( cCur3rdGroup ) + '</b></TD>' + CRLF
+                  cHTML := cHTML + '</TR>' + CRLF
+               endif
+            else   
+               if n2ndGroup > 0
+                  if .not. aLineData[ n2ndGroup ] == cCur2ndGroup
+                     if lColSum
+                        // summation entries for 3rd group and 2nd group
+                        if n3rdGroup > 0
                            cHTML := cHTML + '<TR>' + CRLF
                            for j := 1 to ::nColumnCount
                               if aHTMLColumnWidths[ j ] > 0
@@ -719,43 +691,104 @@ METHOD Export2HTML( cFileName ) CLASS GridPlus
                                  if nPos == 0 // this column is not summed up. empty cell
                                     cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
                                  else // print corresponding total
-                                    cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a3rdGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
+                                    if hmg_len( ::aColumnPicture ) == 0
+                                       cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a3rdGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
+                                    else   
+                                       cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a3rdGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
+                                    endif   
                                  endif                     
                               endif
                            next i
                            cHTML := cHTML + '</TR>' + CRLF
-                        endif   
-                        afill( a3rdGroupTotal, 0 )
+                        endif
+                        if n2ndGroup > 0
+                           cHTML := cHTML + '<TR>' + CRLF
+                           for j := 1 to ::nColumnCount
+                              if aHTMLColumnWidths[ j ] > 0
+                                 nPos := ascan( ::aColumnSum, j )
+                                 if nPos == 0 // this column is not summed up. empty cell
+                                    cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
+                                 else // print corresponding total
+                                    if hmg_len( ::aColumnPicture ) == 0
+                                       cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a2ndGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
+                                    else
+                                       cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( transform( a2ndGroupTotal[ nPos ], ::aColumnPicture[ j ] ) ) + '</b></TD>' + CRLF
+                                    endif                                 
+                                 endif                     
+                              endif
+                           next i
+                           cHTML := cHTML + '</TR>' + CRLF
+                        endif
+                     endif
+                     // second level group changed
+                     afill( a2ndGroupTotal, 0 )
+                     afill( a3rdGroupTotal, 0 )
+                     cCur2ndGroup := aLineData[ n2ndGroup ]
+                     cHTML := cHTML + '<TR>' + CRLF
+                     cHTML := cHTML + cGroupTD + replicate( '&nbsp;', ::nGroupIndent ) + '<b>' + alltrim( ::aColumnHeaders[ n2ndGroup ] ) + ' : ' + alltrim( cCur2ndGroup ) + '</b></TD>' + CRLF
+                     cHTML := cHTML + '</TR>' + CRLF
+                     // change for 3rd level grouping if available
+                     if n3rdGroup > 0
                         cCur3rdGroup := aLineData[ n3rdGroup ]
                         cHTML := cHTML + '<TR>' + CRLF
                         cHTML := cHTML + cGroupTD + replicate( '&nbsp;', ::nGroupIndent + ::nGroupIndent ) + '<b>' + alltrim( ::aColumnHeaders[ n3rdGroup ] ) + ' : ' + alltrim( cCur3rdGroup ) + '</b></TD>' + CRLF
                         cHTML := cHTML + '</TR>' + CRLF
                      endif
-                  endif
-               endif                  
-            endif            
+                  else
+                  // check for 3rd level grouping
+                     if n3rdGroup > 0
+                        if .not. aLineData[ n3rdGroup ] == cCur3rdGroup
+                           if lColSum 
+                           // summation for 3rd grouping
+                              cHTML := cHTML + '<TR>' + CRLF
+                              for j := 1 to ::nColumnCount
+                                 if aHTMLColumnWidths[ j ] > 0
+                                    nPos := ascan( ::aColumnSum, j )
+                                    if nPos == 0 // this column is not summed up. empty cell
+                                       cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '</TD>' + CRLF
+                                    else // print corresponding total
+                                       cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + '<b>' + alltrim( str( a3rdGroupTotal[ nPos ] ) ) + '</b></TD>' + CRLF
+                                    endif                     
+                                 endif
+                              next i
+                              cHTML := cHTML + '</TR>' + CRLF
+                           endif   
+                           afill( a3rdGroupTotal, 0 )
+                           cCur3rdGroup := aLineData[ n3rdGroup ]
+                           cHTML := cHTML + '<TR>' + CRLF
+                           cHTML := cHTML + cGroupTD + replicate( '&nbsp;', ::nGroupIndent + ::nGroupIndent ) + '<b>' + alltrim( ::aColumnHeaders[ n3rdGroup ] ) + ' : ' + alltrim( cCur3rdGroup ) + '</b></TD>' + CRLF
+                           cHTML := cHTML + '</TR>' + CRLF
+                        endif
+                     endif
+                  endif                  
+               endif            
+            endif
+         endif      
+         if lColSum
+            for n := 1 to hmg_len( ::aColumnSum )
+               nValue := val( alltrim( ::StripComma( aLineData[ ::aColumnSum[ n ] ] ) ) )
+               aColTotal[ n ] := aColTotal[ n ] + nValue
+               if lGrouping
+                  a1stGroupTotal[ n ] := a1stGroupTotal[ n ] + nValue
+                  a2ndGroupTotal[ n ] := a2ndGroupTotal[ n ] + nValue
+                  a3rdGroupTotal[ n ] := a3rdGroupTotal[ n ] + nValue
+               endif   
+            next n
          endif
-      endif      
-      if lColSum
-         for n := 1 to hmg_len( ::aColumnSum )
-            nValue := val( alltrim( ::StripComma( aLineData[ ::aColumnSum[ n ] ] ) ) )
-            aColTotal[ n ] := aColTotal[ n ] + nValue
-            if lGrouping
-               a1stGroupTotal[ n ] := a1stGroupTotal[ n ] + nValue
-               a2ndGroupTotal[ n ] := a2ndGroupTotal[ n ] + nValue
-               a3rdGroupTotal[ n ] := a3rdGroupTotal[ n ] + nValue
-            endif   
-         next n
-      endif
-      cHTML := cHTML + '<TR>' + CRLF
-      for j := 1 to ::nColumnCount
-         if aHTMLColumnWidths[ j ] > 0
-            cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + aLineData[ j ] + '</TD>' + CRLF
+         cHTML := cHTML + '<TR>' + CRLF
+         for j := 1 to ::nColumnCount
+            if aHTMLColumnWidths[ j ] > 0
+               cHTML := cHTML + '<TD WIDTH=' + alltrim( str( aHTMLColumnWidths[ j ] ) ) + ' ALIGN="' + aHTMLColumnJustify[ j ] + '">' + aLineData[ j ] + '</TD>' + CRLF
+            endif
+         next j
+         cHTML := cHTML + '</TR>' + CRLF
+         if i < nBuffer
+            i := i + 1
          endif
-      next i
-      cHTML := cHTML + '</TR>' + CRLF
+         fWrite( fHandle, cHTML )   
+      next k   
    next i         
-
+   cHTML := ''
    if lColSum
       if lGrouping
          // print all levels of total

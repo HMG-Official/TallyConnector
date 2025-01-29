@@ -518,7 +518,17 @@ function exportdaybookcsv
       return nil
    endif
    oGP:AddArrayData( aDaybook )
-   oGP:ColumnHeaders := { "$Key", "$MasterId", "$AlterID", "$VoucherNumber", "$Date", "$VoucherTypeName", "$Led_Lineno", "$Type", "$LedgerName", "$Amount", "$Led_Parent", "$Led_Group", "$Party_LedName", "$Vch_GSTIN", "$Led_GSTIN", "$Party_GST_Type", "$GST_Classification", "$Narration", "$EnteredBy", "$LastEventinVoucher", "$UpdatedDate", "$UpdatedTime", "$Nature_Led", "$Led_MID", "$CompanyName", "$Year_from", "$Year_to", "$Company_number", "$Path" }
+   aColumnHeaders := { "$Key", "$MasterId", "$AlterID", "$VoucherNumber", "$Date", "$VoucherTypeName", "$Led_Lineno", "$Type", "$LedgerName", "$Amount", "$Led_Parent", "$Led_Group", "$Party_LedName", "$Vch_GSTIN", "$Led_GSTIN", "$Party_GST_Type", "$GST_Classification", "$Narration", "$EnteredBy", "$LastEventinVoucher", "$UpdatedDate", "$UpdatedTime", "$Nature_Led", "$Led_MID", "$CompanyName", "$Year_from", "$Year_to", "$Company_number", "$Path" }
+   if main.nodollar.value
+      for i := 1 to hmg_len( aColumnHeaders )
+         cFieldName := aColumnHeaders[ i ]
+         if hb_uleft( cFieldName, 1 ) == "$"
+            cFieldName := hb_uright( cFieldName, hmg_len( cFieldName ) - 1 )
+            aColumnHeaders[ i ] := cFieldName
+         endif
+      next i
+   endif
+   oGP:ColumnHeaders := aColumnHeaders
    oGP:ColumnJustify := { 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0 }
    oGP:ColumnWidths := { 20, 10, 10, 20, 10, 20, 10, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 }
    oGP:Export2CSV()
@@ -621,8 +631,18 @@ function exportledgercsv
       msgstop( "Nothing to export!", "Tally Connector!")
       return nil
    endif
+   aColumnHeaders := { "$Name", "$_PrimaryGroup", "$Parent", "$OpeningBalance", "$ClosingBalance", "$_PrevYearBalance", "$IsRevenue", "$PartyGSTIN", "$MasterId", "$AlterID", "$Nature_Led", "$UpdatedDate", "$UpdatedTime", "$CreatedBy", "$CreatedDate", "$AlteredDate", "$AlteredBy", "$LastVoucherDate", "$CompanyName", "$Year_from", "$Year_to", "$Company_number", "$Path" }
+   if main.nodollar.value
+      for i := 1 to hmg_len( aColumnHeaders )
+         cFieldName := aColumnHeaders[ i ]
+         if hb_uleft( cFieldName, 1 ) == "$"
+            cFieldName := hb_uright( cFieldName, hmg_len( cFieldName ) - 1 )
+            aColumnHeaders[ i ] := cFieldName
+         endif
+      next i
+   endif
    oGP:AddArrayData( aLedger )
-   oGP:ColumnHeaders := { "$Name", "$_PrimaryGroup", "$Parent", "$OpeningBalance", "$ClosingBalance", "$_PrevYearBalance", "$IsRevenue", "$PartyGSTIN", "$MasterId", "$AlterID", "$Nature_Led", "$UpdatedDate", "$UpdatedTime", "$CreatedBy", "$CreatedDate", "$AlteredDate", "$AlteredBy", "$LastVoucherDate", "$CompanyName", "$Year_from", "$Year_to", "$Company_number", "$Path" }
+   oGP:ColumnHeaders := aColumnHeaders
    oGP:ColumnJustify := { 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0 }
    oGP:ColumnWidths := { 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 }
    oGP:Export2CSV()
@@ -728,8 +748,18 @@ function exportstockcsv
       msgstop( "Nothing to export!", "Tally Connector!")
       return nil
    endif
+   aColumnHeaders := { "$MasterId", "$AlterID", "$Name", "$PartnoParent", "$Category", "$OpeningBalance", "$ClosingBalance", "$ClosingRate", "$ClosingValue", "$LastPurcCost", "$LastPurcDate", "$LastPurcParty", "$LastPurcPrice", "$LastPurcQty", "$LastSaleDate", "$LastSaleParty", "$LastSaleQty", "$LastVoucherDate", "$EnteredBy", "$GSTTypeofSupply", "$CostingMethod", "$ValuationMethod", "$BaseUnits", "$AdditionalUnits", "$_HSNCode", "$_IntegratedTax", "$_CentralTax", "$_StateTax", "$_HSNDescription", "$_InwardQuantity", "$_InwardValue", "$_OutwardQuantity", "$_OutwardValue", "$CompanyName", "$Year_from", "$Year_to", "$Company_number", "$Path"  }
+   if main.nodollar.value
+      for i := 1 to hmg_len( aColumnHeaders )
+         cFieldName := aColumnHeaders[ i ]
+         if hb_uleft( cFieldName, 1 ) == "$"
+            cFieldName := hb_uright( cFieldName, hmg_len( cFieldName ) - 1 )
+            aColumnHeaders[ i ] := cFieldName
+         endif
+      next i
+   endif
    oGP:AddArrayData( aStock )
-   oGP:ColumnHeaders := { "$MasterId", "$AlterID", "$Name", "$PartnoParent", "$Category", "$OpeningBalance", "$ClosingBalance", "$ClosingRate", "$ClosingValue", "$LastPurcCost", "$LastPurcDate", "$LastPurcParty", "$LastPurcPrice", "$LastPurcQty", "$LastSaleDate", "$LastSaleParty", "$LastSaleQty", "$LastVoucherDate", "$EnteredBy", "$GSTTypeofSupply", "$CostingMethod", "$ValuationMethod", "$BaseUnits", "$AdditionalUnits", "$_HSNCode", "$_IntegratedTax", "$_CentralTax", "$_StateTax", "$_HSNDescription", "$_InwardQuantity", "$_InwardValue", "$_OutwardQuantity", "$_OutwardValue", "$CompanyName", "$Year_from", "$Year_to", "$Company_number", "$Path"  }
+   oGP:ColumnHeaders := aColumnHeaders
    oGP:ColumnJustify := { 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0 }
    oGP:ColumnWidths := { 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 }
    oGP:Export2CSV()
@@ -830,8 +860,18 @@ function exportforensicscsv
       msgstop( "Nothing to export!", "Tally Connector!")
       return nil
    endif
+   aColumnHeaders := { "$Name", "$Createdby", "$CreatedDate", "$Masterid", "$Alterid", "$Alteredon", "$Alteredby", "$Updateddatetime", "$LastVoucherDate", "$Parent", "$_PrimaryGroup", "$$AscrAmt:$openingBalance", "$$AscrAmt:$_ClosingBalance" }
+   if main.nodollar.value
+      for i := 1 to hmg_len( aColumnHeaders )
+         cFieldName := aColumnHeaders[ i ]
+         if hb_uleft( cFieldName, 1 ) == "$"
+            cFieldName := hb_uright( cFieldName, hmg_len( cFieldName ) - 1 )
+            aColumnHeaders[ i ] := cFieldName
+         endif
+      next i
+   endif
    oGP:AddArrayData( aForensics )
-   oGP:ColumnHeaders := { "$Name", "$Createdby", "$CreatedDate", "$Masterid", "$Alterid", "$Alteredon", "$Alteredby", "$Updateddatetime", "$LastVoucherDate", "$Parent", "$_PrimaryGroup", "$$AscrAmt:$openingBalance", "$$AscrAmt:$_ClosingBalance" }
+   oGP:ColumnHeaders := aColumnHeaders
    oGP:ColumnWidths := { 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 }
    oGP:ColumnJustify := { 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 }
    oGP:Export2CSV()
@@ -1318,7 +1358,12 @@ function exporttable( lCSV )
       endif      
       oRecSet := TOleAuto():New('ADODB.Recordset')
       oRecSet:CursorLocation = adUseClient
-      cQuery := "Select * from " + cTable
+	  if cTable == '_All_Vouchers' // all vouchers
+	     cColumns := c_All_Vouchers
+      else
+	     cColumns := '*'
+	  endif
+      cQuery := "Select " + cColumns + " from " + cTable
       main.status.value := "Please wait...downloading from " + cTable
       oRecSet:Open( cQuery , oConnection , adOpenForwardOnly , adLockReadOnly )  
       nRecords := oRecSet:RecordCount()
@@ -1396,8 +1441,18 @@ function exporttable( lCSV )
          aadd( aSize, 100 )
          aadd( aJustify, 0 )
       next i         
+      aColumnHeaders := aclone( aFields )
+      if main.nodollar.value
+         for i := 1 to hmg_len( aColumnHeaders )
+            cFieldName := aColumnHeaders[ i ]
+            if hb_uleft( cFieldName, 1 ) == "$"
+               cFieldName := hb_uright( cFieldName, hmg_len( cFieldName ) - 1 )
+               aColumnHeaders[ i ] := cFieldName
+            endif
+         next i
+      endif
       oGP:AddArrayData( aData )
-      oGP:ColumnHeaders := aFields
+      oGP:ColumnHeaders := aColumnHeaders
       oGP:ColumnJustify := aJustify
       oGP:ColumnWidths := aSize
       if lCSV 
@@ -1537,6 +1592,9 @@ function exportexcelxml
    local aSize := {}
    local aJustify := {}
    local nSheets := 0
+   local nBuffer := 0
+   local nRecBuffer := 300
+   
    if hmg_len( aDaybook ) == 0 .and. hmg_len( aLedger ) == 0 .and. hmg_len( aStock ) == 0 .and. hmg_len( aForensics ) == 0 .and. nPages <= nDefaultPages
       msgstop( "Noting to Export! Import any or all tables first!", "Tally Connector!")
       return nil
@@ -1607,6 +1665,15 @@ function exportexcelxml
       nRows := hmg_len( aDayBook )
       aColumnHeaders := { "$Key", "$MasterId", "$AlterID", "$VoucherNumber", "$Date", "$VoucherTypeName", "$Led_Lineno", "$Type", "$LedgerName", "$Amount", "$Led_Parent", "$Led_Group", "$Party_LedName", "$Vch_GSTIN", "$Led_GSTIN", "$Party_GST_Type", "$GST_Classification", "$Narration", "$EnteredBy", "$LastEventinVoucher", "$UpdatedDate", "$UpdatedTime", "$Nature_Led", "$Led_MID", "$CompanyName", "$Year_from", "$Year_to", "$Company_number", "$Path" }
       nCols := hmg_len( aColumnHeaders )
+      if main.nodollar.value
+         for i := 1 to hmg_len( aColumnHeaders )
+            cFieldName := aColumnHeaders[ i ]
+            if hb_uleft( cFieldName, 1 ) == "$"
+               cFieldName := hb_uright( cFieldName, hmg_len( cFieldName ) - 1 )
+               aColumnHeaders[ i ] := cFieldName
+            endif
+         next i
+      endif
       aColumnjustify := { 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0 }
       cXML := cXML + '<Table ss:ExpandedColumnCount="' + alltrim( str( nCols ) ) + '" ss:ExpandedRowCount="' + alltrim( str(nRows + 1) ) + '" x:FullColumns="1"' + cLBr
       cXML := cXML + 'x:FullRows="1" ss:DefaultRowHeight="15">' + cLBr
@@ -1615,24 +1682,39 @@ function exportexcelxml
          cXML := cXML + '<Cell><Data ss:Type="String">' + aColumnHeaders[ i ] + '</Data></Cell>' + cLBr
       next i      
       cXML := cXML + '</Row>' + cLBr
+      fWrite( fHandle, cXML )   
+      cXML := ''
+      
       for i := 1 to nRows
-         main.status.value := "Daybook " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
-         cXML := cXML + '<Row>' + cLBr
-         for j := 1 to nCols
-            if aColumnJustify[ j ] == 1
-               cData := aDayBook[ i, j ]
-               if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
-                  cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
+         if nRows - i > nRecBuffer
+            nBuffer := i + nRecBuffer - 1
+         else
+            nBuffer := nRows
+         endif
+         cXML := ''
+         for k := i to nBuffer
+            main.status.value := "Daybook " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
+            cXML := cXML + '<Row>' + cLBr
+            for j := 1 to nCols
+               if aColumnJustify[ j ] == 1
+                  cData := aDayBook[ i, j ]
+                  if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
+                     cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
+                  else   
+                     cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+                  endif   
                else   
-                  cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+                  cXML := cXML + '<Cell><Data ss:Type="String">' + aDayBook[ i, j ] + '</Data></Cell>' + cLBr
                endif   
-            else   
-               cXML := cXML + '<Cell><Data ss:Type="String">' + aDayBook[ i, j ] + '</Data></Cell>' + cLBr
-            endif   
-         next j      
-         cXML := cXML + '</Row>' + cLBr
+            next j      
+            cXML := cXML + '</Row>' + cLBr
+            if i < nBuffer
+               i := i + 1
+            endif
+         next k
+         fWrite( fHandle, cXML )   
       next i
-      cXML := cXML + '</Table>' + cLBr
+      cXML := '</Table>' + cLBr
       cXML := cXML + '</Worksheet>' + cLBr
       fWrite( fHandle, cXML )   
       cXML := ''
@@ -1645,6 +1727,15 @@ function exportexcelxml
       nRows := hmg_len( aLedger )
       aColumnHeaders := { "$Name", "$_PrimaryGroup", "$Parent", "$OpeningBalance", "$ClosingBalance", "$_PrevYearBalance", "$IsRevenue", "$PartyGSTIN", "$MasterId", "$AlterID", "$Nature_Led", "$UpdatedDate", "$UpdatedTime", "$CreatedBy", "$CreatedDate", "$AlteredDate", "$AlteredBy", "$LastVoucherDate", "$CompanyName", "$Year_from", "$Year_to", "$Company_number", "$Path" }
       nCols := hmg_len( aColumnHeaders )
+      if main.nodollar.value
+         for i := 1 to hmg_len( aColumnHeaders )
+            cFieldName := aColumnHeaders[ i ]
+            if hb_uleft( cFieldName, 1 ) == "$"
+               cFieldName := hb_uright( cFieldName, hmg_len( cFieldName ) - 1 )
+               aColumnHeaders[ i ] := cFieldName
+            endif
+         next i
+      endif
       aColumnjustify := { 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0 }
       cXML := cXML + '<Table ss:ExpandedColumnCount="' + alltrim( str( nCols ) ) + '" ss:ExpandedRowCount="' + alltrim( str(nRows + 1) ) + '" x:FullColumns="1"' + cLBr
       cXML := cXML + 'x:FullRows="1" ss:DefaultRowHeight="15">' + cLBr
@@ -1653,24 +1744,38 @@ function exportexcelxml
          cXML := cXML + '<Cell><Data ss:Type="String">' + aColumnHeaders[ i ] + '</Data></Cell>' + cLBr
       next i      
       cXML := cXML + '</Row>' + cLBr
+      fWrite( fHandle, cXML )   
+      cXML := ''      
       for i := 1 to nRows
-         main.status.value := "Ledger Master " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
-         cXML := cXML + '<Row>' + cLBr
-         for j := 1 to nCols
-            if aColumnJustify[ j ] == 1
-               cData := aLedger[ i, j ]
-               if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
-                  cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
+         if nRows - i > nRecBuffer
+            nBuffer := i + nRecBuffer - 1
+         else
+            nBuffer := nRows
+         endif
+         cXML := ''
+         for k := i to nBuffer
+            main.status.value := "Ledger Master " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
+            cXML := cXML + '<Row>' + cLBr
+            for j := 1 to nCols
+               if aColumnJustify[ j ] == 1
+                  cData := aLedger[ i, j ]
+                  if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
+                     cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
+                  else   
+                     cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+                  endif   
                else   
-                  cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+                  cXML := cXML + '<Cell><Data ss:Type="String">' + aLedger[ i, j ] + '</Data></Cell>' + cLBr
                endif   
-            else   
-               cXML := cXML + '<Cell><Data ss:Type="String">' + aLedger[ i, j ] + '</Data></Cell>' + cLBr
-            endif   
-         next j      
-         cXML := cXML + '</Row>' + cLBr
+            next j      
+            cXML := cXML + '</Row>' + cLBr
+            if i < nBuffer
+               i := i + 1
+            endif
+         next k
+         fWrite( fHandle, cXML )   
       next i
-      cXML := cXML + '</Table>' + cLBr
+      cXML := '</Table>' + cLBr
       cXML := cXML + '</Worksheet>' + cLBr
       fWrite( fHandle, cXML )   
       cXML := ''
@@ -1682,6 +1787,15 @@ function exportexcelxml
       cXML := cXML + '<Worksheet ss:Name="' + cSheetName + '">' + cLBr
       nRows := hmg_len( aStock )
       aColumnHeaders := { "$MasterId", "$AlterID", "$Name", "$PartnoParent", "$Category", "$OpeningBalance", "$ClosingBalance", "$ClosingRate", "$ClosingValue", "$LastPurcCost", "$LastPurcDate", "$LastPurcParty", "$LastPurcPrice", "$LastPurcQty", "$LastSaleDate", "$LastSaleParty", "$LastSaleQty", "$LastVoucherDate", "$EnteredBy", "$GSTTypeofSupply", "$CostingMethod", "$ValuationMethod", "$BaseUnits", "$AdditionalUnits", "$_HSNCode", "$_IntegratedTax", "$_CentralTax", "$_StateTax", "$_HSNDescription", "$_InwardQuantity", "$_InwardValue", "$_OutwardQuantity", "$_OutwardValue", "$CompanyName", "$Year_from", "$Year_to", "$Company_number", "$Path"  }
+      if main.nodollar.value
+         for i := 1 to hmg_len( aColumnHeaders )
+            cFieldName := aColumnHeaders[ i ]
+            if hb_uleft( cFieldName, 1 ) == "$"
+               cFieldName := hb_uright( cFieldName, hmg_len( cFieldName ) - 1 )
+               aColumnHeaders[ i ] := cFieldName
+            endif
+         next i
+      endif
       nCols := hmg_len( aColumnHeaders )
       aColumnjustify := { 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0 }
       cXML := cXML + '<Table ss:ExpandedColumnCount="' + alltrim( str( nCols ) ) + '" ss:ExpandedRowCount="' + alltrim( str(nRows + 1) ) + '" x:FullColumns="1"' + cLBr
@@ -1691,24 +1805,38 @@ function exportexcelxml
          cXML := cXML + '<Cell><Data ss:Type="String">' + aColumnHeaders[ i ] + '</Data></Cell>' + cLBr
       next i      
       cXML := cXML + '</Row>' + cLBr
+      fWrite( fHandle, cXML )   
+      cXML := ''      
       for i := 1 to nRows
-         main.status.value := "Stock Master " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
-         cXML := cXML + '<Row>' + cLBr
-         for j := 1 to nCols
-            if aColumnJustify[ j ] == 1
-               cData := aStock[ i, j ]
-               if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
-                  cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
+         if nRows - i > nRecBuffer
+            nBuffer := i + nRecBuffer - 1
+         else
+            nBuffer := nRows
+         endif
+         cXML := ''
+         for k := i to nBuffer
+            main.status.value := "Stock Master " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
+            cXML := cXML + '<Row>' + cLBr
+            for j := 1 to nCols
+               if aColumnJustify[ j ] == 1
+                  cData := aStock[ i, j ]
+                  if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
+                     cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
+                  else   
+                     cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+                  endif   
                else   
-                  cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+                  cXML := cXML + '<Cell><Data ss:Type="String">' + aStock[ i, j ] + '</Data></Cell>' + cLBr
                endif   
-            else   
-               cXML := cXML + '<Cell><Data ss:Type="String">' + aStock[ i, j ] + '</Data></Cell>' + cLBr
-            endif   
-         next j      
-         cXML := cXML + '</Row>' + cLBr
+            next j      
+            cXML := cXML + '</Row>' + cLBr
+            if i < nBuffer
+               i := i + 1 
+            endif
+         next k
+         fWrite( fHandle, cXML )   
       next i
-      cXML := cXML + '</Table>' + cLBr
+      cXML := '</Table>' + cLBr
       cXML := cXML + '</Worksheet>' + cLBr
       fWrite( fHandle, cXML )   
       cXML := ''
@@ -1722,6 +1850,15 @@ function exportexcelxml
       nRows := hmg_len( aForensics )
       aColumnHeaders := { "$Name", "$Createdby", "$CreatedDate", "$Masterid", "$Alterid", "$Alteredon", "$Alteredby", "$Updateddatetime", "$LastVoucherDate", "$Parent", "$_PrimaryGroup", "$$AscrAmt:$openingBalance", "$$AscrAmt:$_ClosingBalance" }
       nCols := hmg_len( aColumnHeaders )
+      if main.nodollar.value
+         for i := 1 to hmg_len( aColumnHeaders )
+            cFieldName := aColumnHeaders[ i ]
+            if hb_uleft( cFieldName, 1 ) == "$"
+               cFieldName := hb_uright( cFieldName, hmg_len( cFieldName ) - 1 )
+               aColumnHeaders[ i ] := cFieldName
+            endif
+         next i
+      endif
       aColumnjustify := { 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 }
       cXML := cXML + '<Table ss:ExpandedColumnCount="' + alltrim( str( nCols ) ) + '" ss:ExpandedRowCount="' + alltrim( str(nRows + 1) ) + '" x:FullColumns="1"' + cLBr
       cXML := cXML + 'x:FullRows="1" ss:DefaultRowHeight="15">' + cLBr
@@ -1730,32 +1867,46 @@ function exportexcelxml
          cXML := cXML + '<Cell><Data ss:Type="String">' + aColumnHeaders[ i ] + '</Data></Cell>' + cLBr
       next i      
       cXML := cXML + '</Row>' + cLBr
+      fWrite( fHandle, cXML )   
+      cXML := ''      
       for i := 1 to nRows
-         main.status.value := "Forensics " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
-         cXML := cXML + '<Row>' + cLBr
-         for j := 1 to nCols
-            if aColumnJustify[ j ] == 1
-               cData := aForensics[ i, j ]
-               if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
-                  cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
+         if nRows - i > nRecBuffer
+            nBuffer := i + nRecBuffer - 1
+         else
+            nBuffer := nRows
+         endif
+         cXML := ''
+         for k := i to nBuffer
+            main.status.value := "Forensics " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
+            cXML := cXML + '<Row>' + cLBr
+            for j := 1 to nCols
+               if aColumnJustify[ j ] == 1
+                  cData := aForensics[ i, j ]
+                  if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
+                     cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
+                  else   
+                     cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+                  endif   
                else   
-                  cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+                  cXML := cXML + '<Cell><Data ss:Type="String">' + aForensics[ i, j ] + '</Data></Cell>' + cLBr
                endif   
-            else   
-               cXML := cXML + '<Cell><Data ss:Type="String">' + aForensics[ i, j ] + '</Data></Cell>' + cLBr
-            endif   
-         next j      
-         cXML := cXML + '</Row>' + cLBr
+            next j      
+            cXML := cXML + '</Row>' + cLBr
+            if i < nBuffer
+               i := i + 1
+            endif
+         next k   
+         fWrite( fHandle, cXML )   
       next i
-      cXML := cXML + '</Table>' + cLBr
+      cXML := '</Table>' + cLBr
       cXML := cXML + '</Worksheet>' + cLBr
       fWrite( fHandle, cXML )   
       cXML := ''
    endif   
    main.status.value := ""
          
-   for k := 5 to nPages
-      cTable := main.datatab.caption( k )
+   for l := 5 to nPages
+      cTable := main.datatab.caption( l )
       aCurTable := {}
       aFields := {}
       aJustify := {}
@@ -1781,34 +1932,48 @@ function exportexcelxml
          cXML := cXML + '<Cell><Data ss:Type="String">' + aColumnHeaders[ i ] + '</Data></Cell>' + cLBr
       next i      
       cXML := cXML + '</Row>' + cLBr
+      fWrite( fHandle, cXML )   
+      cXML := ''      
       for i := 1 to nRows
-         main.status.value := cTable + " " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
-         cXML := cXML + '<Row>' + cLBr
-         for j := 1 to nCols
-            if aColumnJustify[ j ] == 1
-               cData := aCurTable[ i, j ]
-               if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
-                  cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
-               else
-                  if cData == 'Error!'
-                     cXML := cXML + '<Cell><Data ss:Type="String">' + cData + '</Data></Cell>' + cLBr
-                  else   
-                     cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+         if nRows - i > nRecBuffer
+            nBuffer := i + nRecBuffer - 1
+         else
+            nBuffer := nRows
+         endif
+         cXML := ''
+         for k := i to nBuffer
+            main.status.value := cTable + " " + alltrim( str( i ) ) + '/' + alltrim( str( nRows ) )
+            cXML := cXML + '<Row>' + cLBr
+            for j := 1 to nCols
+               if aColumnJustify[ j ] == 1
+                  cData := aCurTable[ i, j ]
+                  if hmg_len( cData  ) == 10 .and. hb_usubstr( cData, 3, 1 ) == '-' .and. hb_usubstr( cData, 6, 1 ) == '-'  // date
+                     cXML := cXML + '<Cell ss:StyleID="myDateStyle"><Data ss:Type="DateTime">' + hb_usubstr( cData, 7, 4 ) + '-' + hb_usubstr(cData, 4, 2) + '-' + hb_usubstr( cData, 1, 2 ) + '</Data></Cell>' + cLBr
+                  else
+                     if cData == 'Error!'
+                        cXML := cXML + '<Cell><Data ss:Type="String">' + cData + '</Data></Cell>' + cLBr
+                     else   
+                        cXML := cXML + '<Cell><Data ss:Type="Number">' + cData + '</Data></Cell>' + cLBr
+                     endif   
                   endif   
+               else   
+                  cXML := cXML + '<Cell><Data ss:Type="String">' + aCurTable[ i, j ] + '</Data></Cell>' + cLBr
                endif   
-            else   
-               cXML := cXML + '<Cell><Data ss:Type="String">' + aCurTable[ i, j ] + '</Data></Cell>' + cLBr
-            endif   
-         next j      
-         cXML := cXML + '</Row>' + cLBr
+            next j      
+            cXML := cXML + '</Row>' + cLBr
+            if i < nBuffer
+               i := i + 1
+            endif
+         next k
+         fWrite( fHandle, cXML )
       next i
-      cXML := cXML + '</Table>' + cLBr
+      cXML := '</Table>' + cLBr
       cXML := cXML + '</Worksheet>' + cLBr
       fWrite( fHandle, cXML )   
       cXML := ''
       main.status.value := ""
-   next k   
-   cXML := cXML + '</Workbook>' + cLBr
+   next l   
+   cXML := '</Workbook>' + cLBr
    fWrite( fHandle, cXML )   
    if fclose( fHandle )
       msginfo( 'Exported to file ' + cFileName + ' Successfully!' )
@@ -1846,3 +2011,4 @@ function findcolumns
    set alter to
    msginfo( cColumns )
 return cColumns
+
